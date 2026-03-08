@@ -1,0 +1,13 @@
+{
+  "currency": "CAD",
+  "fx_pair": "CADUSD=X",
+  "tickers": [
+    "SHOP.TO", "RY.TO", "TD.TO", "ENB.TO", "CNR.TO", "CP.TO", "BCE.TO",
+    "XIU.TO", "XIC.TO",
+    "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "TSLA", "META",
+    "SPY", "QQQ",
+    "BTC-USD", "ETH-USD", "SOL-USD"
+  ],
+  "alerts": [],
+  "excluded_sectors": ["alcohol", "arms", "drugs", "gambling", "tobacco", "vice"]
+}

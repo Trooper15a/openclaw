@@ -1,0 +1,16 @@
+# systemd timer — runs the updater daily at 3:00am
+# Install via: bash finance-bot/scripts/install-updater.sh
+
+[Unit]
+Description=FinClaw Auto-Update Timer — daily sync with upstream
+
+[Timer]
+# Run at 3:00am every day (quiet hours, markets closed)
+OnCalendar=*-*-* 03:00:00
+# If the machine was off at 3am, run the update within 10 minutes of next boot
+Persistent=true
+# Add a random delay up to 5 minutes to avoid hammering GitHub at exactly 3:00
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

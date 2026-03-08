@@ -1,0 +1,89 @@
+# FinClaw Docker Compose Stack
+# Usage: docker-compose -f docker-compose.finance.yml up -d
+#
+# Prerequisites:
+#   - Docker + Docker Compose installed
+#   - Ollama running locally on the host (or change OLLAMA_HOST to point to a remote instance)
+#   - Copy openclaw.json.example to ~/.openclaw/openclaw.json and fill in your values
+#   - Copy .env.example to .env and fill in secrets (OPENCLAW_GATEWAY_TOKEN at minimum)
+
+services:
+
+  # ── Main FinClaw Gateway ─────────────────────────────────────────────────
+  finclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: finclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "18789:18789"  # Gateway API — do NOT expose to the internet; use Tailscale for remote access
+    volumes:
+      # Fix 12: use ${HOME} instead of ~ — tilde is not expanded by Docker Compose on all runtimes
+      - ${HOME}/.openclaw:/home/user/.openclaw
+      - ${HOME}/.openclaw/workspace-finclaw:/workspace
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # Fix 14: inside Docker, localhost = the container. host-gateway reaches the host machine.
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host-gateway:11434}
+      - FINANCE_MONITOR_WATCHLIST=${FINANCE_MONITOR_WATCHLIST:-AAPL,MSFT,NVDA,BTC-USD,ETH-USD}
+      - MOOMOO_OPEND_HOST=${MOOMOO_OPEND_HOST:-host-gateway}
+      - MOOMOO_OPEND_PORT=${MOOMOO_OPEND_PORT:-11111}
+      - MOOMOO_TRADE_ENV=${MOOMOO_TRADE_ENV:-SIMULATE}
+      - MOOMOO_SECURITY_FIRM=${MOOMOO_SECURITY_FIRM:-FUTUINC}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY:-}
+    extra_hosts:
+      - "host-gateway:host-gateway"  # lets the container reach Ollama on the host machine
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18789/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Watchtower — Auto-Update ──────────────────────────────────────────────
+  # Watches for new ghcr.io/openclaw/openclaw:latest images every hour.
+  # When OpenClaw ships an update, Watchtower pulls it and restarts finclaw-gateway
+  # automatically — zero manual intervention needed.
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: finclaw-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Fix 11: removed --label-enable flag — it puts Watchtower in label-filter mode,
+    # causing it to ignore finclaw-gateway (which has no watchtower.enable label).
+    # Passing the container name as a positional arg is the correct way to target one container.
+    command: --interval 3600 --cleanup finclaw-gateway
+    # Fix 13: Watchtower crashes at startup when WATCHTOWER_NOTIFICATIONS is set
+    # but the webhook URL is empty. Notifications are opt-in — uncomment to enable.
+    # environment:
+    #   - WATCHTOWER_NOTIFICATIONS=slack
+    #   - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${WATCHTOWER_SLACK_WEBHOOK_URL}
+    #   - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=finclaw-watchtower
+
+  # ── Ollama (optional — runs on host for best RAM/GPU access) ─────────────
+  # Ollama is expected to run directly on the host machine (not in Docker) for the best
+  # RAM and GPU access with large models like qwen3-coder:30b.
+  #
+  # If you prefer to run Ollama inside Docker, uncomment the block below.
+  #
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-models:/root/.ollama
+  #   # Uncomment for NVIDIA GPU passthrough:
+  #   # deploy:
+  #   #   resources:
+  #   #     reservations:
+  #   #       devices:
+  #   #         - driver: nvidia
+  #   #           count: all
+  #   #           capabilities: [gpu]
+
+# volumes:
+#   ollama-models:
