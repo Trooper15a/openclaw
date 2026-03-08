@@ -94,9 +94,9 @@
         default: {
           token: "YOUR_DISCORD_BOT_TOKEN_HERE",
           guilds: {
-            "1479630826223439944": {
+            "YOUR_GUILD_ID": {
               channels: {
-                "1479630833282191363": { allow: true, requireMention: false },
+                "YOUR_CHANNEL_ID": { allow: true, requireMention: false },
               },
             },
           },

@@ -107,7 +107,7 @@ print(f"\nTotal Portfolio Value: C${total_value:,.2f}")
 print(f"Total P&L: C${total_pnl:+,.2f} ({total_pnl_pct:+.2f}%)")
 ```
 
-### Compare to SPY (S&P 500 benchmark) over same period
+### Compare to XIU.TO (S&P/TSX 60 benchmark) over same period
 
 ```python
 import yfinance as yf
@@ -115,12 +115,12 @@ import yfinance as yf
 created = portfolio["created"]  # e.g. "2026-03-01"
 
 # Fix: add progress=False; add .dropna() before positional access
-spy = yf.download("SPY", start=created, auto_adjust=True, progress=False)["Close"].dropna()
-spy_return = ((spy.iloc[-1] - spy.iloc[0]) / spy.iloc[0]) * 100
+xiu = yf.download("XIU.TO", start=created, auto_adjust=True, progress=False)["Close"].dropna()
+xiu_return = ((xiu.iloc[-1] - xiu.iloc[0]) / xiu.iloc[0]) * 100
 
-print(f"SPY return since {created}: {spy_return:+.2f}%")
+print(f"XIU.TO return since {created}: {xiu_return:+.2f}%")
 print(f"Portfolio return since {created}: {total_pnl_pct:+.2f}%")
-print(f"Alpha: {total_pnl_pct - spy_return:+.2f}%")
+print(f"Alpha: {total_pnl_pct - xiu_return:+.2f}%")
 ```
 
 ## Daily Report Format

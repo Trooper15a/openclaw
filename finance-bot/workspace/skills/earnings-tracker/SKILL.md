@@ -160,7 +160,7 @@ def scan_upcoming_earnings(tickers: list, days_ahead: int = 7) -> list:
 watchlist = os.environ.get("FINANCE_MONITOR_WATCHLIST", "AAPL,MSFT,NVDA").split(",")
 upcoming = scan_upcoming_earnings(watchlist)
 for item in upcoming:
-    est = f"EPS est: ${item['eps_estimate']:.2f}" if item['eps_estimate'] else "EPS est: N/A"
+    est = f"EPS est: C${item['eps_estimate']:.2f}" if item['eps_estimate'] else "EPS est: N/A"
     print(f"  {item['ticker']} reports {item['date']} — {est}")
 if not upcoming:
     print("  No earnings in the next 7 days for watchlist tickers.")
@@ -209,7 +209,7 @@ def earnings_price_reactions(symbol: str, quarters: int = 4) -> list:
 
 for r in earnings_price_reactions("AAPL"):
     direction = "UP" if r["move_pct"] > 0 else "DOWN"
-    print(f"  {r['date']}: {r['result']} -> {direction} {abs(r['move_pct']):.1f}%  (${r['close_before']:.2f} -> ${r['close_after']:.2f})")
+    print(f"  {r['date']}: {r['result']} -> {direction} {abs(r['move_pct']):.1f}%  (C${r['close_before']:.2f} -> C${r['close_after']:.2f})")
 ```
 
 ## Output Format
