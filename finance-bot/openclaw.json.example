@@ -1,0 +1,140 @@
+// finance-bot/openclaw.json.example
+// Copy to ~/.openclaw/openclaw.json and fill in your values.
+// This configures FinClaw as a multi-agent finance + coding bot.
+{
+  agents: {
+    defaults: {
+      model: "ollama/qwen3-coder:30b",  // primary: 256K context, coding-optimized
+      workspace: "~/.openclaw/workspace-finclaw",
+    },
+    list: [
+      {
+        // Main orchestrator — receives your messages, delegates to subagents
+        id: "finclaw",
+        name: "FinClaw",
+        default: true,
+        workspace: "~/.openclaw/workspace-finclaw",
+        agentDir: "~/.openclaw/agents/finclaw/agent",
+        model: "ollama/qwen3-coder:30b",
+        sandbox: {
+          mode: "all",
+          scope: "agent",
+        },
+        tools: {
+          allow: [
+            "exec",
+            "read",
+            "write",
+            "edit",
+            "web_fetch",
+            "cron",
+            "sessions_spawn",
+            "sessions_send",
+            "sessions_list",
+            "sessions_history",
+            "session_status",
+          ],
+          deny: ["browser", "canvas", "nodes"],
+        },
+      },
+      {
+        // Coding subagent — builds apps and scripts via Claude Code style workflows
+        id: "coder",
+        name: "FinClaw Coder",
+        workspace: "~/.openclaw/workspace-finclaw-coder",
+        agentDir: "~/.openclaw/agents/coder/agent",
+        model: "ollama/qwen3-coder:30b",
+        sandbox: {
+          mode: "all",
+          scope: "session",
+          docker: {
+            setupCommand: "apt-get update && apt-get install -y git curl python3 python3-pip nodejs npm && pip3 install yfinance pandas ta matplotlib pytz feedparser moomoo-api",
+          },
+        },
+      },
+      {
+        // Finance monitor subagent — lightweight background watcher
+        id: "monitor",
+        name: "FinClaw Monitor",
+        workspace: "~/.openclaw/workspace-finclaw-monitor",
+        agentDir: "~/.openclaw/agents/monitor/agent",
+        model: "ollama/glm-4.7-flash",  // lighter model for simple monitoring tasks
+        sandbox: {
+          mode: "all",
+          scope: "agent",
+        },
+        tools: {
+          allow: ["exec", "read", "write", "cron"],
+          deny: ["browser", "canvas", "nodes", "sessions_spawn"],
+        },
+      },
+    ],
+  },
+
+  // Agent-to-agent messaging: allow finclaw to delegate to coder and monitor.
+  // Fix 15: removed "finclaw" from the allow list — an agent delegating to itself
+  // creates an infinite loop risk.
+  tools: {
+    agentToAgent: {
+      enabled: true,
+      allow: ["coder", "monitor"],
+    },
+  },
+
+  // Route your Discord/Telegram channel to the main finclaw agent
+  bindings: [
+    { agentId: "finclaw", match: { channel: "discord", accountId: "default" } },
+    // { agentId: "finclaw", match: { channel: "telegram", accountId: "default" } },
+  ],
+
+  channels: {
+    discord: {
+      groupPolicy: "allowlist",
+      accounts: {
+        default: {
+          token: "YOUR_DISCORD_BOT_TOKEN_HERE",
+          guilds: {
+            "1479630826223439944": {
+              channels: {
+                "1479630833282191363": { allow: true, requireMention: false },
+              },
+            },
+          },
+        },
+      },
+    },
+    // Uncomment and fill in for Telegram instead of (or in addition to) Discord:
+    // telegram: {
+    //   accounts: {
+    //     default: {
+    //       botToken: "YOUR_TELEGRAM_BOT_TOKEN",
+    //       dmPolicy: "allowlist",
+    //       allowFrom: ["tg:YOUR_TELEGRAM_USER_ID"],
+    //     },
+    //   },
+    // },
+  },
+
+  // Sandbox defaults (Docker)
+  sandbox: {
+    mode: "all",
+    scope: "agent",
+    docker: {
+      image: "openclaw-sandbox:bookworm-slim",
+      readOnlyRoot: false,
+    },
+  },
+
+  // Environment variables
+  // Prefer a .env file or system environment variables for secrets.
+  // Fix 16: use host-gateway instead of localhost — inside Docker, localhost
+  // is the container itself, not the host machine running Ollama.
+  env: {
+    OLLAMA_HOST: "http://host-gateway:11434",
+    FINANCE_MONITOR_WATCHLIST: "AAPL,MSFT,NVDA,GOOGL,AMZN,TSLA,META,SPY,QQQ,BTC-USD,ETH-USD,SOL-USD,SHOP.TO,RY.TO,TD.TO,ENB.TO,XIU.TO",
+    // TAVILY_API_KEY: set in .env file, not here (REQUIRED for news/research)
+    // MOOMOO_OPEND_HOST: "127.0.0.1" — set in .env file
+    // MOOMOO_OPEND_PORT: 11111
+    // MOOMOO_TRADE_ENV: "SIMULATE" for paper, "REAL" for live
+  },
+}

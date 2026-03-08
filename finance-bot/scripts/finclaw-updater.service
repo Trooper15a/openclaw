@@ -1,0 +1,24 @@
+# systemd service unit for FinClaw auto-updater
+# Install via: bash finance-bot/scripts/install-updater.sh
+# NOTE: install-updater.sh overwrites this file with correct paths and user —
+#       the values below are placeholders only.
+
+[Unit]
+Description=FinClaw Auto-Update — sync fork with upstream openclaw/openclaw
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Fix 10: removed %E specifier (config-dir, not a path variable).
+# install-updater.sh writes the real path here at install time.
+ExecStart=/bin/bash /opt/finclaw/openclaw/finance-bot/scripts/auto-update.sh
+StandardOutput=journal
+StandardError=journal
+# Replace 'finclaw' with your actual non-root username.
+# install-updater.sh sets this automatically via --user flag.
+User=finclaw
+Group=finclaw
+
+[Install]
+WantedBy=multi-user.target
