@@ -25,6 +25,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       # Fix 14: inside Docker, localhost = the container. host-gateway reaches the host machine.
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host-gateway:11434}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-ollama-local}
       - FINANCE_MONITOR_WATCHLIST=${FINANCE_MONITOR_WATCHLIST:-AAPL,MSFT,NVDA,BTC-USD,ETH-USD}
       - MOOMOO_OPEND_HOST=${MOOMOO_OPEND_HOST:-host-gateway}
       - MOOMOO_OPEND_PORT=${MOOMOO_OPEND_PORT:-11111}
