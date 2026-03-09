@@ -130,7 +130,7 @@
   // Fix 16: use host-gateway instead of localhost — inside Docker, localhost
   // is the container itself, not the host machine running Ollama.
   env: {
-    OLLAMA_HOST: "http://host-gateway:11434",
+    OLLAMA_HOST: "http://host.docker.internal:11434",
     FINANCE_MONITOR_WATCHLIST: "AAPL,MSFT,NVDA,GOOGL,AMZN,TSLA,META,SPY,QQQ,BTC-USD,ETH-USD,SOL-USD,SHOP.TO,RY.TO,TD.TO,ENB.TO,XIU.TO",
     // TAVILY_API_KEY: set in .env file, not here (REQUIRED for news/research)
     // MOOMOO_OPEND_HOST: "127.0.0.1" — set in .env file
