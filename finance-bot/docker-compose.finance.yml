@@ -11,7 +11,10 @@ services:
 
   # ── Main FinClaw Gateway ─────────────────────────────────────────────────
   finclaw-gateway:
-    image: ghcr.io/openclaw/openclaw:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.finclaw-gateway
+    image: finclaw-gateway:local
     container_name: finclaw-gateway
     restart: unless-stopped
     ports:

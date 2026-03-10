@@ -1,0 +1,14 @@
+# Extends the official OpenClaw gateway image with moomoo-api pre-installed.
+# This ensures moomoo trading works across container restarts without manual pip installs.
+FROM ghcr.io/openclaw/openclaw:latest
+
+USER root
+
+RUN apt-get update -qq && \
+    apt-get install -y -qq python3-pip && \
+    pip3 install moomoo-api --break-system-packages --quiet && \
+    mkdir -p /home/node/.com.moomoo.OpenD/Log && \
+    chown -R node:node /home/node/.com.moomoo.OpenD && \
+    rm -rf /var/lib/apt/lists/*
+
+USER node
