@@ -40,6 +40,24 @@ If unsure about a company — skip it. Never buy a doubtful stock.
 4. **Technical** — RSI < 45 (not overbought), price above 20-day MA
 5. **Volume** — above average volume (momentum confirmation)
 
+## Momentum Signals (supplementary — applied ONLY after halal check passes and 2+ core signals are already met)
+
+Momentum adds a small score boost. It never initiates a trade on its own.
+
+**Momentum Buy Signals** — each qualifying signal adds +0.5 to buy score (cap: +1 total from momentum):
+- **Price momentum**: Stock up >3% in last 5 days AND above 20-day MA (short-term trend confirmation)
+- **Relative strength**: Stock outperforming SPY by >5% over last 20 days (sector strength)
+- **Volume momentum**: Volume 1.5x above 20-day average for 3+ consecutive days (institutional accumulation)
+- **52-week high proximity**: Within 10% of 52-week high with strong volume (breakout setup)
+
+**Momentum Sell Signals** — any ONE triggers a sell:
+- Price drops >5% in a single day on high volume (momentum reversal)
+- Stock underperforms SPY by >10% over 10 days (losing momentum)
+
+**Momentum Position Sizing**: trades where momentum boosted the score get SMALLER position sizes — max 1% portfolio risk (half the normal 2%). Momentum moves fast and has higher false positive rates.
+
+**Hard rule**: momentum scoring only runs after halal check passes AND at least 2 core signals (RSI, news) are already confirmed. Never trade on momentum alone.
+
 ## Sell Signals (any ONE triggers a sell)
 1. Stop loss hit: price down 7% from entry
 2. Take profit hit: price up 15% (sell half, let rest run)

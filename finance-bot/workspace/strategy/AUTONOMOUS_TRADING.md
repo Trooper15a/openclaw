@@ -23,6 +23,14 @@ For each ticker in watchlist.json:
 - Score 0-5, record reasoning
 - Add to candidates list if score >= 3
 
+### Step 3b — Momentum Score (run only if core score >= 2 AND halal check passed)
+After calculating the core score (RSI, news, volume, MA), layer in momentum signals:
+- Check each of the 4 momentum signals defined in MOMENTUM_RULES.md
+- Add +0.5 for each momentum signal present (max +1 total added to score from momentum)
+- If any momentum signal triggered, flag the candidate as `momentum_boosted = true`
+- Log which momentum signals fired, e.g.: "Momentum: +0.5 price momentum (up 4.1% in 5d, above 20MA), +0.5 volume momentum (1.8x avg for 4 days) — total momentum boost: +1"
+- If `momentum_boosted = true`, cap position size at 1% portfolio risk instead of the normal 2%
+
 ## Step 4 — Earnings Check (REQUIRED before any buy)
 For the full candidates list from Step 3, run the earnings-tracker skill:
 - Call `scan_upcoming_earnings(candidates, days_ahead=2)` to find any ticker reporting within 48h
