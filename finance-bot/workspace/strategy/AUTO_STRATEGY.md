@@ -4,6 +4,73 @@
 Run this strategy autonomously every market scan. Research → Decide → Execute → Reinvest.
 All profits are reinvested immediately to compound returns.
 
+---
+
+## Market Trend Override (Master Gate — Runs BEFORE Everything Else)
+
+The market trend check is the outermost gate of the entire strategy. It runs before the halal filter, before news, before RSI — before any individual stock analysis whatsoever. A great stock setup in a collapsing market is still a losing trade. This gate prevents the bot from fighting the tape.
+
+Run the market-trend skill at the start of every session:
+```bash
+python3 market_trend.py --json
+```
+
+Read the `verdict` and `position_size_multiplier` fields. Apply the rules below immediately and for the entire session.
+
+### STRONG_BEAR (score 0–2)
+- **No new buy positions. Period.**
+- Cash is the position. Even score-10 individual setups get skipped.
+- Only action: tighten stops on existing holdings (consider moving stop to -5% from entry instead of -7%).
+- Do NOT average down on any existing position.
+- Discord alert: "MARKET VERDICT: STRONG_BEAR — Bot holding cash. No new positions until conditions improve."
+- `allow_new_buys = False` — exit the scan after managing existing stops.
+
+### BEAR (score 2–4)
+- **Max 3 open positions simultaneously** (do not open a 4th even if capital is available).
+- **Position size = 40% of normal** (`position_size_multiplier = 0.40`).
+- **Minimum buy score raised to 5.0** (normal minimum is 3.0). Marginal setups are skipped entirely.
+- Only consider the absolute highest-conviction halal trades (ideally defensive-sector names).
+- Tighten stop losses on existing positions: consider -5% instead of -7%.
+- Momentum boost does NOT apply in BEAR conditions — no relaxing thresholds.
+
+### NEUTRAL (score 4–6)
+- **Position size = 70% of normal** (`position_size_multiplier = 0.70`).
+- **Minimum buy score raised to 3.5** (not 3.0). Skip anything on the fence.
+- Do not open more than 5 simultaneous positions.
+- Skip any trade where the only buy signals are momentum signals. Core signals (RSI, news, MA) must be present.
+- Normal stop loss (-7%) applies.
+
+### BULL (score 6–8)
+- **Normal rules apply.** `position_size_multiplier = 1.00`.
+- **Minimum buy score: 3.0** (standard threshold).
+- Normal position count limits apply.
+- All scan steps proceed as documented below.
+
+### STRONG_BULL (score 8–10)
+- **Position size up to 120% of normal** (`position_size_multiplier = 1.20`) on highest conviction trades.
+- **Minimum buy score relaxed to 2.5** — the broad market is supporting moves, so good setups that just miss the normal threshold are worth taking.
+- Scan entire watchlist aggressively. Do not pre-filter by sector.
+- Momentum score boost still applies and can contribute to reaching the 2.5 threshold.
+- Normal stop loss (-7%) still applies — STRONG_BULL does not change risk management.
+
+### Position Size Stacking With Economic Calendar
+
+The market trend multiplier stacks multiplicatively with the economic calendar multiplier (from ECONOMIC_CALENDAR_RULES.md):
+
+```
+final_position_size = normal_size × market_trend_multiplier × economic_calendar_multiplier
+```
+
+Examples:
+- NEUTRAL market (0.70) × CPI day CAUTION (0.50) = **0.35× normal size**
+- BEAR market (0.40) × CLEAR calendar (1.00) = **0.40× normal size**
+- BULL market (1.00) × FOMC AVOID → **no new buys** (AVOID overrides everything)
+- STRONG_BULL (1.20) × NFP CAUTION (0.50) = **0.60× normal size**
+
+The economic calendar AVOID verdict always wins — if the calendar says AVOID or GO_TO_CASH, that blocks new buys regardless of market trend verdict.
+
+---
+
 ## Halal Filter (Non-Negotiable — check FIRST before any research)
 NEVER buy any stock that:
 - Is a bank or conventional financial institution (interest-based: RY, TD, BMO, BNS, CM, JPM, BAC, etc.)
