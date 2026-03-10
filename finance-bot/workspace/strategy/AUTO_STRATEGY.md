@@ -35,16 +35,17 @@ If unsure about a company — skip it. Never buy a doubtful stock.
 
 ## Buy Signals (need 3+ to trigger a buy)
 1. **Halal check** — passes halal filter above (required, not optional)
-2. **News sentiment** — Tavily search shows positive news in last 24h, no red flags
-3. **Technical** — RSI < 45 (not overbought), price above 20-day MA
-4. **Volume** — above average volume (momentum confirmation)
-5. **No earnings** — earnings report NOT within 48 hours (too risky)
+2. **Earnings check PASS** — no earnings within 48h (NON-NEGOTIABLE — if earnings are within 48h, skip the trade regardless of all other signals; use earnings-tracker skill to verify)
+3. **News sentiment** — Tavily search shows positive news in last 24h, no red flags
+4. **Technical** — RSI < 45 (not overbought), price above 20-day MA
+5. **Volume** — above average volume (momentum confirmation)
 
 ## Sell Signals (any ONE triggers a sell)
 1. Stop loss hit: price down 7% from entry
 2. Take profit hit: price up 15% (sell half, let rest run)
 3. Major negative news breaks on a held position
 4. Company fails halal filter on re-check (divest immediately)
+5. Earnings within 24h AND unrealized gain > 5% — sell/reduce position to lock in profit before earnings risk
 
 ## Research Process (run for each candidate)
 1. Halal check first — skip immediately if fails
